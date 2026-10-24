@@ -18,6 +18,14 @@
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
+  <!-- Loading Overlay (I1) -->
+  <div id="app-loading" class="app-loading-overlay">
+    <div style="text-align: center;">
+      <div class="loading-spinner"></div>
+      <div style="margin-top: 14px; font-size: 0.9rem; color: var(--text-muted);">กำลังโหลดข้อมูลพอร์ต...</div>
+    </div>
+  </div>
+
   <div class="app-container">
     <!-- Header -->
     <header class="app-header">
@@ -36,7 +44,7 @@
     </header>
 
     <!-- KPI Summary Grid -->
-    <section class="kpi-grid">
+    <section class="kpi-grid fade-in-section">
       <div class="glass-panel kpi-card">
         <span class="kpi-label">เงินปันผลเฉลี่ยต่อสัปดาห์</span>
         <div id="kpi-weekly-usd" class="kpi-value" style="color: #38BDF8;">$0.00</div>
@@ -62,7 +70,7 @@
     <!-- Main Workspace -->
     <div class="main-layout">
       <!-- Left Column: Dime OCR & Portfolio Holdings -->
-      <section>
+      <section class="fade-in-section">
         <!-- Dime Slip Dropzone -->
         <div class="glass-panel" style="margin-bottom: 24px;">
           <h2 class="section-title">
@@ -96,7 +104,7 @@
       </section>
 
       <!-- Right Column: Dividend Data & Discord Action -->
-      <section>
+      <section class="fade-in-section">
         <!-- Discord Trigger Panel -->
         <div class="glass-panel" style="margin-bottom: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -130,6 +138,12 @@
         </div>
       </section>
     </div>
+
+    <!-- N4: Footer with version & last update -->
+    <footer class="app-footer fade-in-section">
+      <div>ETF Dividend Tracker v1.3 — by <a href="https://github.com/Hosxiz" target="_blank" rel="noopener">Hosxiz</a></div>
+      <div id="footer-last-updated">ข้อมูลยังไม่ได้โหลด</div>
+    </footer>
   </div>
 
   <!-- Modal: Confirm Parsed Dime Slip -->
@@ -167,7 +181,7 @@
   <!-- Modal: Add / Edit Holding -->
   <div id="modal-add-holding" class="modal-overlay">
     <div class="modal-content">
-      <h2 style="margin-bottom: 16px; font-size: 1.2rem;">➕ เพิ่ม / แก้ไข Ticker ในพอร์ต</h2>
+      <h2 id="modal-add-holding-title" style="margin-bottom: 16px; font-size: 1.2rem;">➕ เพิ่ม / แก้ไข Ticker ในพอร์ต</h2>
       <form id="form-add-holding">
         <div class="form-group">
           <label>Ticker Symbol (เช่น CHPY, SCHD, JEPI)</label>

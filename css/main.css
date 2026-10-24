@@ -44,10 +44,12 @@ body {
 .app-container {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 24px 20px 80px 20px;
+  padding: 24px 20px 40px 20px;
 }
 
-/* Glass Card */
+/* ========================================
+   Glass Card
+   ======================================== */
 .glass-panel {
   background: var(--card-bg);
   backdrop-filter: blur(16px);
@@ -63,7 +65,30 @@ body {
   border-color: var(--card-border-hover);
 }
 
-/* Header */
+/* ========================================
+   N3: Staggered Fade-In Animation
+   ======================================== */
+.fade-in-section {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.fade-in-section:nth-child(1) { animation-delay: 0.05s; }
+.fade-in-section:nth-child(2) { animation-delay: 0.12s; }
+.fade-in-section:nth-child(3) { animation-delay: 0.19s; }
+.fade-in-section:nth-child(4) { animation-delay: 0.26s; }
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   Header — I3: Mobile Responsive
+   ======================================== */
 .app-header {
   display: flex;
   justify-content: space-between;
@@ -71,6 +96,8 @@ body {
   margin-bottom: 28px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--card-border);
+  flex-wrap: wrap;
+  gap: 14px;
 }
 
 .brand-wrapper {
@@ -89,6 +116,7 @@ body {
   justify-content: center;
   font-size: 1.25rem;
   box-shadow: 0 0 15px var(--primary-emerald-glow);
+  flex-shrink: 0;
 }
 
 .brand-title {
@@ -109,10 +137,32 @@ body {
 
 .header-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-/* Buttons */
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .header-actions {
+    justify-content: stretch;
+  }
+  .header-actions .btn {
+    flex: 1;
+    font-size: 0.8rem;
+    padding: 8px 10px;
+    justify-content: center;
+  }
+  .brand-title {
+    font-size: 1.15rem;
+  }
+}
+
+/* ========================================
+   Buttons
+   ======================================== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -127,6 +177,16 @@ body {
   transition: all var(--transition);
   font-family: var(--font-sans);
   text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+/* C1: Disabled state for buttons during async operations */
+.btn:disabled,
+.btn[aria-busy="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .btn-primary {
@@ -171,7 +231,22 @@ body {
   color: #fff;
 }
 
-/* KPI Banner */
+/* I4: Edit button */
+.btn-edit {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--secondary-cyan);
+  border-color: rgba(56, 189, 248, 0.2);
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+.btn-edit:hover {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: var(--secondary-cyan);
+}
+
+/* ========================================
+   KPI Banner — N1: Count-up support
+   ======================================== */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -199,6 +274,7 @@ body {
   font-weight: 700;
   font-family: var(--font-mono);
   color: #fff;
+  transition: color 0.3s ease;
 }
 
 .kpi-value.emerald {
@@ -211,7 +287,77 @@ body {
   color: var(--text-dim);
 }
 
-/* Main 2-Column Grid */
+/* ========================================
+   I1: Skeleton Loading Shimmer
+   ======================================== */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.08) 40%,
+    rgba(255, 255, 255, 0.04) 80%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite ease-in-out;
+  border-radius: var(--radius-sm);
+  color: transparent !important;
+  user-select: none;
+  pointer-events: none;
+}
+
+.skeleton * {
+  visibility: hidden;
+}
+
+.skeleton-line {
+  height: 1.8rem;
+  width: 60%;
+  margin-bottom: 6px;
+}
+
+.skeleton-line-sm {
+  height: 0.9rem;
+  width: 80%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Loading overlay for the whole app init */
+.app-loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  transition: opacity 0.4s ease;
+}
+
+.app-loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--primary-emerald);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========================================
+   Main 2-Column Grid
+   ======================================== */
 .main-layout {
   display: grid;
   grid-template-columns: 1fr 1.25fr;
@@ -224,7 +370,34 @@ body {
   }
 }
 
-/* Section Titles */
+@media (max-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .kpi-card {
+    padding: 14px;
+  }
+  .kpi-value {
+    font-size: 1.3rem;
+  }
+  .kpi-label {
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .app-container {
+    padding: 14px 12px 40px 12px;
+  }
+}
+
+/* ========================================
+   Section Titles
+   ======================================== */
 .section-title {
   font-size: 1.15rem;
   font-weight: 600;
@@ -234,7 +407,9 @@ body {
   justify-content: space-between;
 }
 
-/* Dropzone (Dime Slip) */
+/* ========================================
+   Dropzone (Dime Slip)
+   ======================================== */
 .dropzone {
   border: 2px dashed rgba(56, 189, 248, 0.3);
   border-radius: var(--radius-md);
@@ -278,7 +453,9 @@ body {
   transition: width 0.2s;
 }
 
-/* Holdings Table / List */
+/* ========================================
+   Holdings Table / List
+   ======================================== */
 .holding-item {
   display: flex;
   justify-content: space-between;
@@ -289,6 +466,7 @@ body {
   padding: 12px 16px;
   margin-bottom: 10px;
   transition: all var(--transition);
+  animation: fadeInUp 0.3s ease-out;
 }
 
 .holding-item:hover {
@@ -308,13 +486,48 @@ body {
   font-size: 0.95rem;
 }
 
-/* Upcoming Card Highlight */
+.holding-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* I2: Improved Empty State */
+.empty-state {
+  text-align: center;
+  padding: 32px 20px;
+  color: var(--text-dim);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.empty-state-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.empty-state-text {
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+/* ========================================
+   Upcoming Card Highlight
+   ======================================== */
 .upcoming-banner {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(56, 189, 248, 0.1));
   border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: var(--radius-md);
   padding: 16px 20px;
   margin-bottom: 20px;
+  animation: fadeInUp 0.35s ease-out;
 }
 
 .upcoming-badge {
@@ -328,7 +541,9 @@ body {
   margin-bottom: 8px;
 }
 
-/* Dividend History List */
+/* ========================================
+   Dividend History List
+   ======================================== */
 .div-history-card {
   margin-bottom: 12px;
   padding: 14px 18px;
@@ -340,7 +555,9 @@ body {
   align-items: center;
 }
 
-/* Modals */
+/* ========================================
+   Modals — C2: Overlay close + Escape
+   ======================================== */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -351,6 +568,16 @@ body {
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
@@ -361,6 +588,12 @@ body {
   max-width: 520px;
   padding: 28px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+  animation: modalSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalSlideIn {
+  from { transform: translateY(16px) scale(0.97); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 .form-group {
@@ -391,7 +624,28 @@ body {
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
 }
 
-/* Toasts */
+/* I5: Inline Delete Confirmation */
+.confirm-delete-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-top: 8px;
+  animation: fadeInUp 0.2s ease-out;
+  font-size: 0.82rem;
+}
+
+.confirm-delete-bar span {
+  color: #FCA5A5;
+  flex: 1;
+}
+
+/* ========================================
+   C4 + Toasts — Fade-out animation
+   ======================================== */
 #toast-container {
   position: fixed;
   top: 24px;
@@ -409,12 +663,64 @@ body {
   color: #fff;
   box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   border-left: 4px solid var(--primary-emerald);
-  animation: slideIn 0.25s ease-out;
+  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   max-width: 380px;
   font-size: 0.9rem;
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
-@keyframes slideIn {
+.toast.toast-leaving {
+  opacity: 0;
+  transform: translateX(80px);
+}
+
+/* Undo link in toast */
+.toast-undo {
+  color: var(--secondary-cyan);
+  cursor: pointer;
+  font-weight: 600;
+  margin-left: 8px;
+  text-decoration: underline;
+}
+
+.toast-undo:hover {
+  color: #fff;
+}
+
+@keyframes toastSlideIn {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+/* ========================================
+   N4: Footer
+   ======================================== */
+.app-footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--card-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.app-footer a {
+  color: var(--secondary-cyan);
+  text-decoration: none;
+}
+
+.app-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .app-footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
 }
