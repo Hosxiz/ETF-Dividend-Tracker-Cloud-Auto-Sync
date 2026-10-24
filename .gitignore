@@ -1,0 +1,32 @@
+# Dependency & Cache Directories
+node_modules/
+.npm/
+.wrangler/
+.turbo/
+dist/
+build/
+
+# Local Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.local
+
+# System & OS Files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE & Editor Configs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Large Binary & Requirement Briefs (Private assets)
+*.pdf
+*.docx
+
+# Test & Coverage Outputs
+coverage/
+.nyc_output/

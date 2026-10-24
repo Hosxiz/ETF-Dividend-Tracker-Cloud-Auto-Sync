@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ETF Dividend Tracker — ติดตามและแจ้งเตือนเงินปันผล ETF</title>
+  <meta name="description" content="ระบบติดตามเงินปันผล US ETF (CHPY, SCHD ฯลฯ) พร้อมอ่านสลีป Dime ด้วย OCR และส่งแจ้งเตือนผ่าน Discord">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/main.css">
+  
+  <!-- Tesseract.js v5 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-wrapper">
+        <div class="brand-badge">📈</div>
+        <div>
+          <h1 class="brand-title">ETF Dividend Tracker <span class="brand-version">v1.3</span></h1>
+          <div class="kpi-sub">ติดตามวันจ่ายปันผลอัตโนมัติ • Dime Slip OCR • แจ้งเตือน Discord</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-refresh-data" class="btn btn-secondary" title="รีเฟรชข้อมูลปันผลและราคาล่าสุด">🔄 Refresh Data</button>
+        <button id="btn-export-csv" class="btn btn-secondary" title="ส่งออกข้อมูลพอร์ตเป็น CSV">📥 Export CSV</button>
+        <button id="btn-open-settings" class="btn btn-secondary" title="ตั้งค่า Discord Webhook">⚙️ Settings</button>
+      </div>
+    </header>
+
+    <!-- KPI Summary Grid -->
+    <section class="kpi-grid">
+      <div class="glass-panel kpi-card">
+        <span class="kpi-label">ประมาณการปันผลต่อสัปดาห์ (Weekly Est.)</span>
+        <div id="kpi-weekly-usd" class="kpi-value" style="color: #38BDF8;">$0.00</div>
+        <div id="kpi-weekly-thb" class="kpi-sub">≈ ฿0.00 THB / สัปดาห์</div>
+      </div>
+      <div class="glass-panel kpi-card">
+        <span class="kpi-label">ประมาณการปันผลต่อเดือน (Monthly Est.)</span>
+        <div id="kpi-monthly-usd" class="kpi-value" style="color: #60A5FA;">$0.00</div>
+        <div id="kpi-monthly-thb" class="kpi-sub">≈ ฿0.00 THB / เดือน</div>
+      </div>
+      <div class="glass-panel kpi-card">
+        <span class="kpi-label">ประมาณการปันผลทั้งปี (Annual Est.)</span>
+        <div id="kpi-annual-usd" class="kpi-value emerald">$0.00</div>
+        <div id="kpi-annual-thb" class="kpi-sub">≈ ฿0.00 THB / ปี</div>
+      </div>
+      <div class="glass-panel kpi-card">
+        <span class="kpi-label">ปันผลในอีก 30 วันข้างหน้า</span>
+        <div id="kpi-upcoming-count" class="kpi-value">0 รอบ</div>
+        <div id="kpi-upcoming-sub" class="kpi-sub">ตรวจพบรอบจ่ายรายสัปดาห์</div>
+      </div>
+    </section>
+
+    <!-- Main Workspace -->
+    <div class="main-layout">
+      <!-- Left Column: Dime OCR & Portfolio Holdings -->
+      <section>
+        <!-- Dime Slip Dropzone -->
+        <div class="glass-panel" style="margin-bottom: 24px;">
+          <h2 class="section-title">
+            <span>📷 Dime Slip Parser (OCR)</span>
+            <span style="font-size: 0.75rem; color: var(--secondary-cyan); font-weight: normal;">ไม่ต้องใช้ API Key</span>
+          </h2>
+          <div id="slip-dropzone" class="dropzone">
+            <div class="dropzone-icon">🧾</div>
+            <div style="font-weight: 600; margin-bottom: 4px;">คลิกเพื่ออัปโหลด หรือลากสลีป Dime มาวางที่นี่</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">รองรับไฟล์ภาพ JPG, PNG (จับ Ticker, จำนวนหุ้น, ราคา, วันที่)</div>
+            <input type="file" id="slip-file-input" accept="image/*" style="display: none;">
+          </div>
+          <div id="ocr-progress-box" class="ocr-progress-box">
+            <div class="progress-bar-bg">
+              <div id="ocr-progress-bar" class="progress-bar-fill"></div>
+            </div>
+            <div id="ocr-progress-text" style="font-size: 0.85rem; color: var(--secondary-cyan);">กำลังเตรียมประมวลผล...</div>
+          </div>
+        </div>
+
+        <!-- Portfolio Holdings Management -->
+        <div class="glass-panel">
+          <div class="section-title">
+            <span>💼 พอร์ต ETF ของคุณ</span>
+            <button id="btn-show-add-holding" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.825rem;">+ เพิ่ม Ticker</button>
+          </div>
+          <div id="holdings-list">
+            <!-- Dynamic holding items inserted via app.js -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Dividend Data & Discord Action -->
+      <section>
+        <!-- Discord Trigger Panel -->
+        <div class="glass-panel" style="margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h2 class="section-title" style="margin-bottom: 0;">🚀 Discord Notification</h2>
+            <button id="btn-check-notify" class="btn btn-discord">
+              <span>🔔 Check & Notify</span>
+            </button>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+            กดเพื่อตรวจสอบกำหนดการปันผลใน 30 วันข้างหน้า และส่งสรุปข้อมูลเข้า Discord Channel ทันที
+          </p>
+          <div id="discord-status-box" style="font-size: 0.8rem; color: var(--text-dim); display: flex; align-items: center; gap: 6px;">
+            <span id="discord-indicator">⚪</span> Webhook: <span id="discord-url-display">ยังไม่ได้ตั้งค่า</span>
+          </div>
+        </div>
+
+        <!-- Upcoming Dividends Banner -->
+        <div id="upcoming-dividends-container">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Historical Dividend Records -->
+        <div class="glass-panel">
+          <div class="section-title">
+            <span>📅 ประวัติปันผลย้อนหลัง (Dividend History)</span>
+            <span style="font-size: 0.75rem; color: var(--text-dim);">Yahoo Finance v8</span>
+          </div>
+          <div id="dividend-history-list">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Modal: Confirm Parsed Dime Slip -->
+  <div id="modal-slip-confirm" class="modal-overlay">
+    <div class="modal-content">
+      <h2 style="margin-bottom: 16px; font-size: 1.2rem;">✨ ตรวจสอบข้อมูลจากสลีป Dime</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+        ระบบอ่านข้อมูลอัตโนมัติจากรูปภาพ กรุณาตรวจสอบความถูกต้องก่อนบันทึกเข้าพอร์ต:
+      </p>
+      <form id="form-confirm-slip">
+        <div class="form-group">
+          <label>Ticker Symbol</label>
+          <input type="text" id="slip-ticker" class="form-control" required style="font-family: var(--font-mono); text-transform: uppercase;">
+        </div>
+        <div class="form-group">
+          <label>จำนวนหุ้นที่ซื้อ (Shares)</label>
+          <input type="number" step="any" id="slip-shares" class="form-control" required style="font-family: var(--font-mono);">
+        </div>
+        <div class="form-group">
+          <label>ราคาที่ได้จริง (USD/Share)</label>
+          <input type="number" step="any" id="slip-price" class="form-control" style="font-family: var(--font-mono);">
+        </div>
+        <div class="form-group">
+          <label>วันที่ทำรายการ</label>
+          <input type="text" id="slip-date" class="form-control" readonly style="color: var(--text-dim);">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" id="btn-cancel-slip" class="btn btn-secondary">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary">✅ ยืนยันบันทึกเข้าพอร์ต</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add / Edit Holding -->
+  <div id="modal-add-holding" class="modal-overlay">
+    <div class="modal-content">
+      <h2 style="margin-bottom: 16px; font-size: 1.2rem;">➕ เพิ่ม / แก้ไข Ticker ในพอร์ต</h2>
+      <form id="form-add-holding">
+        <div class="form-group">
+          <label>Ticker Symbol (เช่น CHPY, SCHD, JEPI)</label>
+          <input type="text" id="add-ticker" class="form-control" placeholder="CHPY" required style="text-transform: uppercase; font-family: var(--font-mono);">
+        </div>
+        <div class="form-group">
+          <label>จำนวนหุ้นที่ถือ (Shares)</label>
+          <input type="number" step="any" id="add-shares" class="form-control" placeholder="0.1145716" required style="font-family: var(--font-mono);">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" id="btn-cancel-add" class="btn btn-secondary">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary">บันทึก</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Settings (Discord Webhook & Google Sheet Sync) -->
+  <div id="modal-settings" class="modal-overlay">
+    <div class="modal-content">
+      <h2 style="margin-bottom: 16px; font-size: 1.2rem;">⚙️ ตั้งค่าการเชื่อมต่อ & Cloud Sync</h2>
+      <form id="form-settings">
+        <div class="form-group">
+          <label>Discord Webhook URL</label>
+          <input type="url" id="setting-discord-url" class="form-control" placeholder="https://discord.com/api/webhooks/..." required>
+          <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 4px;">
+            สร้าง Webhook ได้ใน Server Settings > Integrations > Webhooks ใน Discord
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 14px;">
+          <label>Google Apps Script Web App URL (สำหรับ Auto-Sync สลีปไป Google Sheet)</label>
+          <input type="url" id="setting-gas-url" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+          <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 4px;">
+            ได้จากการกด <strong>Deploy > New deployment > Web app</strong> ใน Google Apps Script
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+          <button type="button" id="btn-test-gas-sync" class="btn btn-secondary" style="border-color: var(--secondary-cyan); color: var(--secondary-cyan);">
+            🧪 Test Cloud Sync
+          </button>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" id="btn-cancel-settings" class="btn btn-secondary">ยกเลิก</button>
+            <button type="submit" class="btn btn-primary">บันทึกการตั้งค่า</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Main ES Module Script -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

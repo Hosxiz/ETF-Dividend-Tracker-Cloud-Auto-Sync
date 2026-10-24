@@ -1,0 +1,28 @@
+name: ETF Dividend Daily Auto Notifier
+
+on:
+  schedule:
+    # รันอัตโนมัติทุกวันเวลา 08:00 น. ตามเวลาประเทศไทย (01:00 UTC)
+    - cron: '0 1 * * *'
+  workflow_dispatch: # อนุญาตให้กดทดสอบรันด้วยตัวเองในแท็บ Actions ได้
+
+jobs:
+  check-and-notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run Auto Notifier
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          node -e "
+            const { DividendCalculator } = require('./js/portfolio/dividend-calc.js');
+            console.log('Checking dividends on schedule...');
+          "
