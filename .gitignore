@@ -22,6 +22,7 @@ Desktop.ini
 .idea/
 *.sublime-project
 *.sublime-workspace
+.agents/
 
 # Large Binary & Requirement Briefs (Private assets)
 *.pdf
