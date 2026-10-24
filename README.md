@@ -209,7 +209,7 @@ npx -y serve . -l 8080
 
 ## 👨‍💻 Author & Contact
 
-**Developer / Software Engineer:** [Your Name / Hosxiz]
+**Developer / Software Engineer:** [Your Name / PERANUT MOONSOMBAT]
 - **GitHub:** [@Hosxiz](https://github.com/Hosxiz)
 - **LinkedIn:** [linkedin.com/in/yourprofile](https://linkedin.com) *(Placeholder)*
 - **Portfolio / Website:** [your-portfolio.com](https://your-portfolio.com) *(Placeholder)*
