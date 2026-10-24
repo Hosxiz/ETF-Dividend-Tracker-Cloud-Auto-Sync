@@ -29,33 +29,33 @@
         </div>
       </div>
       <div class="header-actions">
-        <button id="btn-refresh-data" class="btn btn-secondary" title="รีเฟรชข้อมูลปันผลและราคาล่าสุด">🔄 Refresh Data</button>
-        <button id="btn-export-csv" class="btn btn-secondary" title="ส่งออกข้อมูลพอร์ตเป็น CSV">📥 Export CSV</button>
-        <button id="btn-open-settings" class="btn btn-secondary" title="ตั้งค่า Discord Webhook">⚙️ Settings</button>
+        <button id="btn-refresh-data" class="btn btn-secondary" title="ดึงข้อมูลราคาและปันผลล่าสุด">🔄 รีเฟรชข้อมูล</button>
+        <button id="btn-export-csv" class="btn btn-secondary" title="ดาวน์โหลดข้อมูลเป็นไฟล์ Excel">📥 โหลดไฟล์ Excel (CSV)</button>
+        <button id="btn-open-settings" class="btn btn-secondary" title="ตั้งค่าการแจ้งเตือน">⚙️ ตั้งค่าระบบ</button>
       </div>
     </header>
 
     <!-- KPI Summary Grid -->
     <section class="kpi-grid">
       <div class="glass-panel kpi-card">
-        <span class="kpi-label">ประมาณการปันผลต่อสัปดาห์ (Weekly Est.)</span>
+        <span class="kpi-label">เงินปันผลเฉลี่ยต่อสัปดาห์</span>
         <div id="kpi-weekly-usd" class="kpi-value" style="color: #38BDF8;">$0.00</div>
-        <div id="kpi-weekly-thb" class="kpi-sub">≈ ฿0.00 THB / สัปดาห์</div>
+        <div id="kpi-weekly-thb" class="kpi-sub">≈ ฿0.00 บาท / สัปดาห์</div>
       </div>
       <div class="glass-panel kpi-card">
-        <span class="kpi-label">ประมาณการปันผลต่อเดือน (Monthly Est.)</span>
+        <span class="kpi-label">เงินปันผลเฉลี่ยต่อเดือน</span>
         <div id="kpi-monthly-usd" class="kpi-value" style="color: #60A5FA;">$0.00</div>
-        <div id="kpi-monthly-thb" class="kpi-sub">≈ ฿0.00 THB / เดือน</div>
+        <div id="kpi-monthly-thb" class="kpi-sub">≈ ฿0.00 บาท / เดือน</div>
       </div>
       <div class="glass-panel kpi-card">
-        <span class="kpi-label">ประมาณการปันผลทั้งปี (Annual Est.)</span>
+        <span class="kpi-label">เงินปันผลรวมทั้งปี (โดยประมาณ)</span>
         <div id="kpi-annual-usd" class="kpi-value emerald">$0.00</div>
-        <div id="kpi-annual-thb" class="kpi-sub">≈ ฿0.00 THB / ปี</div>
+        <div id="kpi-annual-thb" class="kpi-sub">≈ ฿0.00 บาท / ปี</div>
       </div>
       <div class="glass-panel kpi-card">
-        <span class="kpi-label">ปันผลในอีก 30 วันข้างหน้า</span>
+        <span class="kpi-label">ปันผลที่จะได้รับใน 30 วันนี้</span>
         <div id="kpi-upcoming-count" class="kpi-value">0 รอบ</div>
-        <div id="kpi-upcoming-sub" class="kpi-sub">ตรวจพบรอบจ่ายรายสัปดาห์</div>
+        <div id="kpi-upcoming-sub" class="kpi-sub">คำนวณจากหุ้นในพอร์ต</div>
       </div>
     </section>
 
@@ -66,28 +66,28 @@
         <!-- Dime Slip Dropzone -->
         <div class="glass-panel" style="margin-bottom: 24px;">
           <h2 class="section-title">
-            <span>📷 Dime Slip Parser (OCR)</span>
-            <span style="font-size: 0.75rem; color: var(--secondary-cyan); font-weight: normal;">ไม่ต้องใช้ API Key</span>
+            <span>📷 สแกนสลีป Dime อัตโนมัติ</span>
+            <span style="font-size: 0.75rem; color: var(--secondary-cyan); font-weight: normal;">อ่านจากภาพในเครื่อง</span>
           </h2>
           <div id="slip-dropzone" class="dropzone">
             <div class="dropzone-icon">🧾</div>
-            <div style="font-weight: 600; margin-bottom: 4px;">คลิกเพื่ออัปโหลด หรือลากสลีป Dime มาวางที่นี่</div>
-            <div style="font-size: 0.8rem; color: var(--text-muted);">รองรับไฟล์ภาพ JPG, PNG (จับ Ticker, จำนวนหุ้น, ราคา, วันที่)</div>
+            <div style="font-weight: 600; margin-bottom: 4px;">แตะหรือลากรูปสลีป Dime มาวางที่นี่</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">ระบบจะอ่านชื่อหุ้น, จำนวนหุ้น, ราคา และวันที่ให้เองอัตโนมัติ</div>
             <input type="file" id="slip-file-input" accept="image/*" style="display: none;">
           </div>
           <div id="ocr-progress-box" class="ocr-progress-box">
             <div class="progress-bar-bg">
               <div id="ocr-progress-bar" class="progress-bar-fill"></div>
             </div>
-            <div id="ocr-progress-text" style="font-size: 0.85rem; color: var(--secondary-cyan);">กำลังเตรียมประมวลผล...</div>
+            <div id="ocr-progress-text" style="font-size: 0.85rem; color: var(--secondary-cyan);">กำลังอ่านข้อมูลจากรูปภาพ...</div>
           </div>
         </div>
 
         <!-- Portfolio Holdings Management -->
         <div class="glass-panel">
           <div class="section-title">
-            <span>💼 พอร์ต ETF ของคุณ</span>
-            <button id="btn-show-add-holding" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.825rem;">+ เพิ่ม Ticker</button>
+            <span>💼 รายชื่อหุ้น ETF ของคุณ</span>
+            <button id="btn-show-add-holding" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.825rem;">+ เพิ่มหุ้น</button>
           </div>
           <div id="holdings-list">
             <!-- Dynamic holding items inserted via app.js -->
@@ -100,16 +100,16 @@
         <!-- Discord Trigger Panel -->
         <div class="glass-panel" style="margin-bottom: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <h2 class="section-title" style="margin-bottom: 0;">🚀 Discord Notification</h2>
+            <h2 class="section-title" style="margin-bottom: 0;">🚀 ส่งแจ้งเตือนเข้า Discord</h2>
             <button id="btn-check-notify" class="btn btn-discord">
-              <span>🔔 Check & Notify</span>
+              <span>🔔 ส่งแจ้งเตือนเดี๋ยวนี้</span>
             </button>
           </div>
           <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
-            กดเพื่อตรวจสอบกำหนดการปันผลใน 30 วันข้างหน้า และส่งสรุปข้อมูลเข้า Discord Channel ทันที
+            กดปุ่มนี้เพื่อส่งสรุปยอดเงินปันผลที่จะได้รับใน 30 วันข้างหน้าเข้า Discord ทันที
           </p>
           <div id="discord-status-box" style="font-size: 0.8rem; color: var(--text-dim); display: flex; align-items: center; gap: 6px;">
-            <span id="discord-indicator">⚪</span> Webhook: <span id="discord-url-display">ยังไม่ได้ตั้งค่า</span>
+            <span id="discord-indicator">⚪</span> สถานะ Discord: <span id="discord-url-display">ยังไม่ได้ตั้งค่า</span>
           </div>
         </div>
 
@@ -121,8 +121,8 @@
         <!-- Historical Dividend Records -->
         <div class="glass-panel">
           <div class="section-title">
-            <span>📅 ประวัติปันผลย้อนหลัง (Dividend History)</span>
-            <span style="font-size: 0.75rem; color: var(--text-dim);">Yahoo Finance v8</span>
+            <span>📅 ประวัติการจ่ายปันผลย้อนหลัง</span>
+            <span style="font-size: 0.75rem; color: var(--text-dim);">ข้อมูลจากตลาดจริง</span>
           </div>
           <div id="dividend-history-list">
             <!-- Populated dynamically -->

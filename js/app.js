@@ -228,8 +228,8 @@ class App {
 
         const isLive = m && m.isFallback === false;
         const statusBadge = isLive
-          ? `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600; margin-left: 8px;">🟢 Live Yahoo</span>`
-          : `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; background: rgba(251, 191, 36, 0.15); color: #FBBF24; border: 1px solid rgba(251, 191, 36, 0.3); font-weight: 600; margin-left: 8px;">🟡 Offline Fallback</span>`;
+          ? `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600; margin-left: 8px;">🟢 ข้อมูลสดตลาดจริง</span>`
+          : `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; background: rgba(251, 191, 36, 0.15); color: #FBBF24; border: 1px solid rgba(251, 191, 36, 0.3); font-weight: 600; margin-left: 8px;">🟡 ข้อมูลสำรองในเครื่อง</span>`;
 
         el.innerHTML = `
           <div>
@@ -238,12 +238,12 @@ class App {
               ${statusBadge}
             </div>
             <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">
-              ราคา: $${m?.lastPrice?.toFixed(2) || '—'} | ปันผล/หุ้น/ปี: $${annualRate.toFixed(2)}
+              ราคาหุ้น: $${m?.lastPrice?.toFixed(2) || '—'} | ปันผล: $${annualRate.toFixed(2)}/หุ้น/ปี
             </div>
           </div>
           <div style="text-align: right; margin-right: 12px;">
             <div class="holding-shares">${h.shares.toLocaleString()} หุ้น</div>
-            <div style="font-size: 0.8rem; color: #34D399;">~$${estPayout}/ปี</div>
+            <div style="font-size: 0.8rem; color: #34D399;">รับประมาณ ~$${estPayout}/ปี</div>
           </div>
           <button class="btn btn-danger" data-ticker="${h.ticker}">ลบ</button>
         `;
