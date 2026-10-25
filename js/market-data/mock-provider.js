@@ -8,17 +8,13 @@ export const MOCK_ETF_DATA = {
     ticker: 'CHPY',
     currency: 'USD',
     lastPrice: 19.85,
-    estimatedAnnualPayoutPerShare: 5.20, // ~0.10/week * 52 weeks
+    estimatedAnnualPayoutPerShare: 27.40, // ~$0.5268/week * 52 weeks
     frequency: 'Weekly',
     dividends: [
-      { exDate: '2026-10-30', payDate: '2026-11-06', amountPerShare: 0.1050 },
-      { exDate: '2026-10-23', payDate: '2026-10-30', amountPerShare: 0.1025 },
-      { exDate: '2026-10-16', payDate: '2026-10-23', amountPerShare: 0.0980 },
-      { exDate: '2026-10-09', payDate: '2026-10-16', amountPerShare: 0.1040 },
-      { exDate: '2026-10-02', payDate: '2026-10-09', amountPerShare: 0.1010 },
-      { exDate: '2026-09-25', payDate: '2026-10-02', amountPerShare: 0.0995 },
-      { exDate: '2026-09-18', payDate: '2026-09-25', amountPerShare: 0.1030 },
-      { exDate: '2026-09-11', payDate: '2026-09-18', amountPerShare: 0.1000 }
+      { exDate: '2026-10-21', payDate: '2026-10-22', amountPerShare: 0.4702 },
+      { exDate: '2026-10-14', payDate: '2026-10-15', amountPerShare: 0.5140 },
+      { exDate: '2026-10-07', payDate: '2026-10-08', amountPerShare: 0.5847 },
+      { exDate: '2026-09-30', payDate: '2026-10-01', amountPerShare: 0.5385 }
     ]
   },
   SCHD: {

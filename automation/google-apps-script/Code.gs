@@ -17,8 +17,81 @@ const DISCORD_WEBHOOK_URL = "YOUR_DISCORD_WEBHOOK_URL_HERE";
 // (ถ้าปล่อยว่างไว้ ระบบจะสร้าง Google Sheet แผ่นใหม่ให้ใน Google Drive อัตโนมัติ!)
 const SPREADSHEET_ID = "";
 
-// อัตราแลกเปลี่ยน USD/THB ประมาณการ
-const USD_THB_RATE = 36.0;
+// อัตราแลกเปลี่ยน USD/THB (จะดึงสดอัตโนมัติผ่าน GoogleFinance ถ้าทำได้)
+let USD_THB_RATE = 36.0;
+
+/**
+ * ดึงอัตราแลกเปลี่ยน USD/THB สดจาก GoogleFinance
+ */
+function getLiveUsdThbRate() {
+  try {
+    const tempSheet = SpreadsheetApp.getActiveSpreadsheet() || (SPREADSHEET_ID ? SpreadsheetApp.openById(SPREADSHEET_ID) : null);
+    if (tempSheet) {
+      // ดึงอัตราแลกเปลี่ยนผ่านฟังก์ชัน GOOGLEFINANCE
+      const cell = tempSheet.getSheets()[0].getRange("Z1");
+      cell.setFormula('=GOOGLEFINANCE("CURRENCY:USDTHB")');
+      SpreadsheetApp.flush();
+      const rate = cell.getValue();
+      cell.clear();
+      if (typeof rate === "number" && rate > 20 && rate < 50) {
+        USD_THB_RATE = rate;
+        return rate;
+      }
+    }
+  } catch (e) {
+    Logger.log("Failed to get live FX rate: " + e.message);
+  }
+  return USD_THB_RATE;
+}
+
+/**
+ * รับคำขอ GET จากหน้าเว็บ (Live Market Data Bridge ปลอด CORS)
+ * รองรับ:
+ * - ?action=market_data&ticker=CHPY
+ * - ?action=fx_rate
+ */
+function doGet(e) {
+  try {
+    const action = e.parameter.action;
+    const ticker = (e.parameter.ticker || "").trim().toUpperCase();
+
+    // 1. ดึงอัตราแลกเปลี่ยนสด
+    if (action === "fx_rate") {
+      const liveRate = getLiveUsdThbRate();
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true,
+        rate: liveRate,
+        timestamp: new Date().toISOString()
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // 2. ดึงข้อมูลตลาดหุ้นและปันผลจริงสดๆ ปลอด CORS
+    if (action === "market_data" && ticker) {
+      const data = fetchYahooDividendData(ticker);
+      if (data) {
+        return ContentService.createTextOutput(JSON.stringify({
+          success: true,
+          data: data
+        })).setMimeType(ContentService.MimeType.JSON);
+      } else {
+        return ContentService.createTextOutput(JSON.stringify({
+          success: false,
+          message: "ไม่พบข้อมูล Ticker ในตลาด"
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      message: "พารามิเตอร์ไม่ถูกต้อง (ระบุ action=market_data&ticker=... หรือ action=fx_rate)"
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: err.message
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
 
 /**
  * รับคำขอ POST จากหน้าเว็บ (เมื่อผู้ใช้อัปโหลดสลีปหรือเพิ่มหุ้น)
@@ -56,9 +129,9 @@ function testSendDiscordNow() {
     {
       ticker: "CHPY",
       shares: portfolio.find(p => p.ticker === "CHPY")?.shares || 0.1145716,
-      amount: 0.1050,
-      payoutUSD: (portfolio.find(p => p.ticker === "CHPY")?.shares || 0.1145716) * 0.1050,
-      payoutTHB: (portfolio.find(p => p.ticker === "CHPY")?.shares || 0.1145716) * 0.1050 * USD_THB_RATE,
+      amount: 0.4702,
+      payoutUSD: (portfolio.find(p => p.ticker === "CHPY")?.shares || 0.1145716) * 0.4702,
+      payoutTHB: (portfolio.find(p => p.ticker === "CHPY")?.shares || 0.1145716) * 0.4702 * USD_THB_RATE,
       payDate: Utilities.formatDate(new Date(), "Asia/Bangkok", "yyyy-MM-dd")
     }
   ];
@@ -214,10 +287,10 @@ function syncHoldingsToSheet(sheet, holdings) {
 }
 
 /**
- * ดึงข้อมูลเงินปันผลจาก Yahoo Finance API
+ * ดึงข้อมูลราคาและเงินปันผลจาก Yahoo Finance API (รันบนเซิร์ฟเวอร์ Google ไม่ติด CORS)
  */
 function fetchYahooDividendData(ticker) {
-  const url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?events=div&interval=1d&range=1y`;
+  const url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?events=div&interval=1d&range=2y`;
   try {
     const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
     if (response.getResponseCode() !== 200) return null;
@@ -226,18 +299,65 @@ function fetchYahooDividendData(ticker) {
     const result = json.chart && json.chart.result && json.chart.result[0];
     if (!result) return null;
 
+    const meta = result.meta || {};
+    const lastPrice = meta.regularMarketPrice || meta.chartPreviousClose || 0;
+    const currency = meta.currency || "USD";
+
     const rawDivs = (result.events && result.events.dividends) || {};
-    const dividends = Object.values(rawDivs).map(d => {
+    const divEntries = Object.values(rawDivs);
+
+    // จัดเรียงวันที่จากใหม่ไปเก่า
+    divEntries.sort((a, b) => b.date - a.date);
+
+    // ตรวจสอบความถี่ (Frequency) เช่น ถ้าจ่ายบ่อยกว่า 14 วัน ถือเป็น Weekly
+    let isWeekly = false;
+    if (divEntries.length >= 2) {
+      const avgIntervalDays = Math.abs(divEntries[0].date - divEntries[1].date) / 86400;
+      if (avgIntervalDays < 14) {
+        isWeekly = true;
+      }
+    }
+    if (ticker.toUpperCase() === "CHPY") isWeekly = true;
+
+    const dividends = divEntries.map(d => {
       const exDateObj = new Date(d.date * 1000);
-      const payDateObj = new Date((d.date + 7 * 86400) * 1000);
+      // YieldMax Weekly: XD วันอังคาร -> จ่ายวันพุธ (ถัดไป 1 วันทำการ)
+      // กองทุนทั่วไป: มักจ่าย 7 - 14 วันหลังจาก XD
+      const payDaysAdd = isWeekly ? 1 : 7;
+      const payDateObj = new Date((d.date + payDaysAdd * 86400) * 1000);
+
       return {
         amount: d.amount,
+        amountPerShare: d.amount,
         exDate: Utilities.formatDate(exDateObj, "Asia/Bangkok", "yyyy-MM-dd"),
         payDate: Utilities.formatDate(payDateObj, "Asia/Bangkok", "yyyy-MM-dd")
       };
     });
 
-    return { ticker, dividends };
+    // คำนวณประมาณการปันผลต่อปี (Annual Payout)
+    let estimatedAnnualPayoutPerShare = 0;
+    if (dividends.length > 0) {
+      if (isWeekly) {
+        // ใช้ค่าเฉลี่ย 4 สัปดาห์ล่าสุด * 52 สัปดาห์
+        const recent4 = dividends.slice(0, 4);
+        const avgRecent = recent4.reduce((sum, item) => sum + item.amount, 0) / recent4.length;
+        estimatedAnnualPayoutPerShare = parseFloat((avgRecent * 52).toFixed(4));
+      } else {
+        // กองทุนปกติ รวมยอดที่จ่ายในรอบ 12 เดือนล่าสุด
+        const oneYearAgo = Date.now() - 365 * 86400 * 1000;
+        const pastYearDivs = divEntries.filter(d => (d.date * 1000) >= oneYearAgo);
+        estimatedAnnualPayoutPerShare = pastYearDivs.reduce((sum, d) => sum + d.amount, 0);
+      }
+    }
+
+    return {
+      ticker: ticker.toUpperCase(),
+      currency: currency,
+      lastPrice: lastPrice,
+      frequency: isWeekly ? "Weekly" : "Standard",
+      estimatedAnnualPayoutPerShare: estimatedAnnualPayoutPerShare,
+      dividends: dividends
+    };
   } catch (e) {
     Logger.log("Fetch error for " + ticker + ": " + e.message);
     return null;

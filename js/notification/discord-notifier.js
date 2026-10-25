@@ -57,7 +57,7 @@ export class DiscordNotifier {
           description,
           color: upcomingList.length > 0 ? 0x10B981 : 0x38BDF8,
           fields,
-          footer: { text: 'ETF Dividend Tracker v1.3 • Dime OCR Enabled' },
+          footer: { text: 'ETF Dividend Tracker v1.4 • Dime OCR Enabled' },
           timestamp: new Date().toISOString()
         }
       ]

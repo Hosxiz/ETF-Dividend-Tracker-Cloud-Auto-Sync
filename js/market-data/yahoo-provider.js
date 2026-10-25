@@ -1,10 +1,10 @@
 /**
  * yahoo-provider.js
- * Fetches ETF dividend data via Yahoo Finance v8 chart API with CORS Proxy and Mock fallback.
+ * Fetches ETF dividend data via Google Apps Script Data Bridge (Real-time 100%) or Yahoo Finance API.
  */
 
-import { MOCK_ETF_DATA } from './mock-provider.js';
 import { DividendCalculator } from '../portfolio/dividend-calc.js';
+import { PortfolioStore } from '../portfolio/portfolio-store.js';
 
 export class YahooFinanceProvider {
   /**
@@ -14,9 +14,39 @@ export class YahooFinanceProvider {
    */
   static async fetchETFData(ticker) {
     const cleanTicker = ticker.trim().toUpperCase();
-    const yahooUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${cleanTicker}?events=div&interval=1d&range=2y`;
+    const settings = PortfolioStore.getSettings();
+    const gasUrl = settings.gasWebAppUrl?.trim();
 
-    // Strategy 1: Fast CORS Proxies
+    // Strategy 1: Google Apps Script Web App Bridge (ไม่มีปัญหา CORS, ดึงข้อมูลสดจากตลาด 100%)
+    if (gasUrl && gasUrl.startsWith('https://script.google.com/')) {
+      try {
+        const bridgeUrl = `${gasUrl}${gasUrl.includes('?') ? '&' : '?'}action=market_data&ticker=${encodeURIComponent(cleanTicker)}`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const resp = await fetch(bridgeUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (resp.ok) {
+          const res = await resp.json();
+          if (res.success && res.data && res.data.dividends?.length > 0) {
+            return {
+              ticker: cleanTicker,
+              lastPrice: res.data.lastPrice || 0,
+              currency: res.data.currency || 'USD',
+              frequency: res.data.frequency || 'Standard',
+              dividends: res.data.dividends,
+              estimatedAnnualPayoutPerShare: res.data.estimatedAnnualPayoutPerShare || DividendCalculator.estimateAnnualRate(res.data.dividends),
+              isFallback: false
+            };
+          }
+        }
+      } catch (err) {
+        console.warn(`[GAS Bridge] Failed to fetch live data for ${cleanTicker}:`, err);
+      }
+    }
+
+    // Strategy 2: Fast Multi-CORS Proxies to Yahoo Finance
+    const yahooUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${cleanTicker}?events=div&interval=1d&range=2y`;
     const proxies = [
       `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`,
       `https://corsproxy.io/?url=${encodeURIComponent(yahooUrl)}`
@@ -32,14 +62,14 @@ export class YahooFinanceProvider {
         if (resp.ok) {
           const json = await resp.json();
           const parsed = this._parseYahooResponse(cleanTicker, json);
-          if (parsed && parsed.dividends) return parsed;
+          if (parsed && parsed.dividends?.length > 0) return parsed;
         }
       } catch (err) {
         // Continue to next proxy
       }
     }
 
-    // Attempt 2: Direct Fetch (works if browser allows or extension installed)
+    // Strategy 3: Direct Fetch (if allowed by browser environment)
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
@@ -52,11 +82,19 @@ export class YahooFinanceProvider {
         if (parsed) return parsed;
       }
     } catch (e) {
-      // Direct CORS blocked, proceed to fallback
+      // Direct CORS blocked
     }
 
-    // Fallback: Built-in Mock or Generative Fallback
-    return this._getFallbackData(cleanTicker);
+    // กรณีดึงไม่ได้จริง ๆ ให้ return ข้อมูลว่างและแจ้งเตือนตรง ๆ ไม่สร้างข้อมูล Mock ปลอม
+    return {
+      ticker: cleanTicker,
+      currency: 'USD',
+      lastPrice: 0,
+      estimatedAnnualPayoutPerShare: 0,
+      dividends: [],
+      error: 'ไม่สามารถดึงข้อมูลสดจากตลาดได้ กรุณาตรวจสอบการเชื่อมต่อหรือ Google Apps Script URL',
+      isFallback: false
+    };
   }
 
   static _parseYahooResponse(ticker, data) {

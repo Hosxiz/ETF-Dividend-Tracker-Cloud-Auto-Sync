@@ -1,10 +1,11 @@
-# 📈 ETF Dividend Tracker & Cloud Auto-Sync System
-### *A Production-Ready, Privacy-First FinTech Portfolio Project featuring Client-Side OCR, Resilient Financial Data Pipelines, and Zero-Cost 24/7 Serverless Automation.*
+# 📈 ETF Dividend Tracker & Cloud Auto-Sync System (v1.4)
+### *A Production-Ready, Privacy-First FinTech Portfolio Project featuring Client-Side OCR, 100% Real-Time Market Data Bridge, and Zero-Cost 24/7 Serverless Automation.*
 
+[![Version](https://img.shields.io/badge/Version-v1.4_Production-10B981)](#-executive-summary-บทคัดย่อภาพรวมโครงการ)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B_Modules-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Architecture](https://img.shields.io/badge/Architecture-Vanilla_JS_%7C_No_Framework-45B8AC)](#-key-engineering-highlights--technical-depth)
 [![OCR](https://img.shields.io/badge/OCR-Tesseract.js_Web_Worker-5C2D91)](https://tesseract.projectnaptha.com/)
-[![Market Data](https://img.shields.io/badge/Data-Yahoo_Finance_v8_%2B_Dual_Proxy-6001D2?logo=yahoo)](https://finance.yahoo.com/)
+[![Market Data](https://img.shields.io/badge/Data-GAS_Live_Bridge_%2B_Yahoo_v8-6001D2?logo=yahoo)](https://finance.yahoo.com/)
 [![Cloud](https://img.shields.io/badge/Cloud-Google_Apps_Script_%2B_Sheets-34A853?logo=google)](https://developers.google.com/apps-script)
 [![Notification](https://img.shields.io/badge/Notification-Discord_Webhook_Embed-5865F2?logo=discord&logoColor=white)](https://discord.com/)
 [![Tests](https://img.shields.io/badge/Tests-Node.js_Native_Runner_4%2F4_Pass-22C55E?logo=node.js&logoColor=white)](#-automated-testing--qa)
@@ -15,9 +16,9 @@
 
 ## 📌 Executive Summary (บทคัดย่อภาพรวมโครงการ)
 
-**ETF Dividend Tracker & Cloud Auto-Sync** คือ Web Application ด้าน Financial Technology (FinTech) ที่ถูกออกแบบมาเพื่อแก้ Pain Point ของนักลงทุนหุ้น/กองทุนสหรัฐฯ (US Dividend ETFs เช่น `CHPY`, `SCHD`, `JEPI`, `SPY`) โดยเฉพาะกลุ่มผู้ใช้งานผ่านแอปพลิเคชันโบรกเกอร์ไทยอย่าง **Dime! (by KKP)**
+**ETF Dividend Tracker & Cloud Auto-Sync (v1.4)** คือ Web Application ด้าน Financial Technology (FinTech) ที่ถูกออกแบบมาเพื่อแก้ Pain Point ของนักลงทุนหุ้น/กองทุนสหรัฐฯ (US Dividend ETFs เช่น `CHPY`, `SCHD`, `JEPI`, `SPY`) โดยเฉพาะกลุ่มผู้ใช้งานผ่านแอปพลิเคชันโบรกเกอร์ไทยอย่าง **Dime! (by KKP)**
 
-ระบบชูจุดเด่นด้าน **Zero Operational Cost (ต้นทุนเซิร์ฟเวอร์ 0 บาท)** และ **Client-First Privacy** ด้วยการประมวลผล OCR สลิปซื้อขายภายในเบราว์เซอร์ของผู้ใช้งาน 100% พร้อมเชื่อมต่อสถาปัตยกรรม Serverless Automation บน **Google Apps Script + Google Sheets** เพื่อตรวจสอบรอบปันผลและส่งการแจ้งเตือน Rich Embed เข้า **Discord 24 ชั่วโมงต่อวัน โดยไม่ต้องเปิดคอมพิวเตอร์ทิ้งไว้**
+ในเวอร์ชัน **v1.4** ระบบได้รับการอัปเกรดสถาปัตยกรรมสู่ **100% Real-Time Market Data Bridge** ผ่าน Google Apps Script โดยตัดปัญหาการพึ่งพาข้อมูลจำลอง (Mock Data) เชื่อมโยงข้อมูลเงินปันผลจริงของ YieldMax รายสัปดาห์ (`CHPY`), อัปเดตอัตราแลกเปลี่ยนค่าเงิน USD/THB สดจากตลาดจริง และยังคงจุดเด่นด้าน **Zero Operational Cost (ต้นทุนเซิร์ฟเวอร์ 0 บาท)** และ **Client-First Privacy** ด้วยการประมวลผล OCR สลิปซื้อขายภายในเบราว์เซอร์ของผู้ใช้งาน 100% พร้อมเชื่อมต่อสถาปัตยกรรม Serverless Automation บน **Google Apps Script + Google Sheets** เพื่อตรวจสอบรอบปันผลและส่งการแจ้งเตือน Rich Embed เข้า **Discord 24 ชั่วโมงต่อวัน โดยไม่ต้องเปิดคอมพิวเตอร์ทิ้งไว้**
 
 ---
 
@@ -64,10 +65,11 @@
 - **Zero Data Leakage:** ไฟล์ภาพสลิปของธนาคาร/โบรกเกอร์ถูกประมวลผลแบบ Client-side 100% ไม่มีการอัปโหลดภาพเข้า Server บุคคลที่สาม มอบความเป็นส่วนตัวสูงสุด (Privacy-First)
 - **Heuristic Pattern Matching:** พัฒนาชุด Regex พิเศษสำหรับสกัดข้อมูลสลิป **Dime!** จัดการกรณีเศษหุ้นทศนิยมละเอียดสูง (เช่น `0.1145716` หุ้น), อัตราแลกเปลี่ยน, ราคาเฉลี่ย, และวันที่ทำรายการได้อย่างแม่นยำ
 
-### 2. 🛡️ Resilient Market Data Ingestion Pipeline
-- **Dual-CORS Proxy Fallback:** แก้ปัญหาข้อจำกัด CORS ของ Yahoo Finance v8 API บน Client ด้วยการทำ Multi-Proxy Auto-Failover (AllOrigins ➔ CorsProxy.io)
-- **High-Availability Mock Engine:** มีระบบ Data Integrity Fallback พร้อมชุดข้อมูลจำลอง (Mock Dataset) สำหรับ Ticker สำคัญ (`CHPY`, `SCHD`, `JEPI`, `SPY`) ทำให้เว็บยังคงทำงานได้สมบูรณ์แม้เครือข่ายอินเทอร์เน็ตมีปัญหา
-- **Visual Transparency Badges:** แสดงสถานะแหล่งที่มาข้อมูลแบบโปร่งใส (🟢 `Live Yahoo` vs 🟡 `Offline Fallback`)
+### 2. 🛡️ 100% Real-Time Market Data Ingestion Pipeline (v1.4)
+- **CORS-Free Google Cloud Data Bridge:** ตัดข้อจำกัดเรื่อง CORS และ Rate Limit จาก Public Proxy ฟรี ด้วยการส่งต่อผ่าน Google Apps Script Web App Bridge (`doGet`) ที่รันบน Cloud ของ Google เชื่อมต่อไปยัง Yahoo Finance API แบบ 100% Real-Time
+- **Authentic YieldMax Weekly Math:** ออกแบบตัววิเคราะห์ปันผลพิเศษสำหรับกองทุน Weekly Dividend (เช่น `CHPY`) โดยเฉพาะ สอดคล้องกับรอบประกาศและวันขึ้นเครื่องหมายจริงของ YieldMax (XD วันอังคาร ➔ จ่ายวันพุธถัดไป 1 วันทำการ) ยอดจริง ~$0.47 – $0.58/หุ้น
+- **Dynamic Live FX Rate:** คำนวณยอดเงินบาท (THB) ด้วยอัตราแลกเปลี่ยนสดจากตลาดผ่าน `GOOGLEFINANCE("CURRENCY:USDTHB")` อัตโนมัติ แทนการใช้ค่าคงที่
+- **No-Mock Transparency:** ตัดระบบสร้างข้อมูลสุ่มหลอกตา (No Random Fallback) ระบบจะรายงานสถานะเครือข่ายและการดึงข้อมูลตรงไปตรงมาเพื่อความถูกต้องแม่นยำทางการเงิน
 
 ### 3. ☁️ Zero-Cost Serverless Cloud Automation (24/7 Auto-Sync)
 - **Cloud Database Integration:** ทุกครั้งที่มีการบันทึกสลิปซื้อขาย ข้อมูลจะถูกซิงค์ตรงเข้า Google Sheets ทันทีผ่าน REST POST Endpoint ที่เขียนขึ้นด้วย Google Apps Script

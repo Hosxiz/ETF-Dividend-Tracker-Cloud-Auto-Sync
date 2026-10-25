@@ -40,11 +40,32 @@ class App {
     this.bindEscapeKey();     // C2
     this.renderSkeletonKPIs(); // I1: Show skeleton while loading
 
+    this.usdThbRate = 36.0; // Default fallback
+    await this.fetchLiveFxRate();
     await this.refreshMarketData();
 
     this.hideLoadingOverlay(); // I1
     this.render();
     this.updateFooterTimestamp(); // N4
+  }
+
+  async fetchLiveFxRate() {
+    const gasUrl = this.settings?.gasWebAppUrl?.trim();
+    if (gasUrl && gasUrl.startsWith('https://script.google.com/')) {
+      try {
+        const url = `${gasUrl}${gasUrl.includes('?') ? '&' : '?'}action=fx_rate`;
+        const resp = await fetch(url);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.success && typeof data.rate === 'number') {
+            this.usdThbRate = data.rate;
+            console.log(`[FX] Loaded live USD/THB rate: ${this.usdThbRate}`);
+          }
+        }
+      } catch (e) {
+        console.warn('[FX] Could not fetch live rate, using default:', e);
+      }
+    }
   }
 
   loadState() {
@@ -333,7 +354,7 @@ class App {
   render() {
     this.clearSkeletonKPIs(); // I1: Remove skeletons
 
-    const summary = DividendCalculator.computePortfolioSummary(this.holdings, this.marketDataMap);
+    const summary = DividendCalculator.computePortfolioSummary(this.holdings, this.marketDataMap, this.usdThbRate || 36.0);
 
     // N1: KPI Banner with count-up animation
     const weeklyEl = document.getElementById('kpi-weekly-usd');
