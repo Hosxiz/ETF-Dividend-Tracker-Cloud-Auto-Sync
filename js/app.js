@@ -407,10 +407,10 @@ class App {
       const el = document.createElement('div');
       el.className = 'holding-item';
 
-      const isLive = m && m.isFallback === false;
+      const isLive = m && m.lastPrice > 0;
       const statusBadge = isLive
         ? `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600; margin-left: 8px;">🟢 ข้อมูลสดตลาดจริง</span>`
-        : `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; background: rgba(251, 191, 36, 0.15); color: #FBBF24; border: 1px solid rgba(251, 191, 36, 0.3); font-weight: 600; margin-left: 8px;">🟡 ข้อมูลสำรองในเครื่อง</span>`;
+        : `<span style="font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 600; margin-left: 8px;">🔴 ยังไม่ได้โหลด (กดรีเฟรช)</span>`;
 
       el.innerHTML = `
         <div style="flex: 1; min-width: 0;">
@@ -419,7 +419,7 @@ class App {
             ${statusBadge}
           </div>
           <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 3px;">
-            ราคาหุ้น: $${m?.lastPrice?.toFixed(2) || '—'} | ปันผล: $${annualRate.toFixed(2)}/หุ้น/ปี
+            ${isLive ? `ราคาหุ้น: $${m.lastPrice.toFixed(2)} | ปันผล: $${annualRate.toFixed(2)}/หุ้น/ปี` : 'รอเชื่อมต่อข้อมูลตลาดจริง...'}
           </div>
         </div>
         <div style="text-align: right; margin-right: 12px; flex-shrink: 0;">

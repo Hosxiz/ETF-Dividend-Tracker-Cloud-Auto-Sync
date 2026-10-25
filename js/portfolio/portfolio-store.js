@@ -18,8 +18,7 @@ export class PortfolioStore {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.HOLDINGS);
       if (!data) {
-        // Default seed holding as required in brief: CHPY
-        return [{ ticker: 'CHPY', shares: 0.1145716, averageCostUSD: 42.50, updatedAt: new Date().toISOString() }];
+        return [];
       }
       return JSON.parse(data);
     } catch (e) {

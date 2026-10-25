@@ -134,30 +134,4 @@ export class YahooFinanceProvider {
       return null;
     }
   }
-
-  static _getFallbackData(ticker) {
-    if (MOCK_ETF_DATA[ticker]) {
-      return { ...MOCK_ETF_DATA[ticker], isFallback: true };
-    }
-
-    // Generic fallback if unknown ticker
-    const today = new Date();
-    const nextMonth = new Date(today.getTime() + 14 * 86400000);
-    const payDate = new Date(today.getTime() + 28 * 86400000);
-
-    return {
-      ticker,
-      currency: 'USD',
-      lastPrice: 50.00,
-      estimatedAnnualPayoutPerShare: 2.00,
-      isFallback: true,
-      dividends: [
-        {
-          exDate: nextMonth.toISOString().split('T')[0],
-          payDate: payDate.toISOString().split('T')[0],
-          amountPerShare: 0.50
-        }
-      ]
-    };
-  }
 }

@@ -243,10 +243,6 @@ function getOrCreatePortfolioSheet() {
     sheet = ss.insertSheet("Holdings");
     sheet.appendRow(["Ticker", "Shares", "AverageCostUSD", "LastUpdated"]);
     sheet.getRange("A1:D1").setFontWeight("bold").setBackground("#10B981").setFontColor("#ffffff");
-    // Seed initial row
-    sheet.appendRow(["CHPY", 0.1145716, 19.85, new Date().toISOString()]);
-    sheet.appendRow(["SCHD", 10, 83.10, new Date().toISOString()]);
-    sheet.appendRow(["JEPI", 5, 56.40, new Date().toISOString()]);
   }
   return sheet;
 }
